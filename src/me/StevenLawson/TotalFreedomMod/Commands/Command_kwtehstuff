@@ -22,7 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 @CommandPermissions(level = AdminLevel.ALL, source = SourceType.ONLY_IN_GAME)
 @CommandParameters(description = "Kwteh's Stuff", usage = "access", aliases = "ks")
-public class Command_bs extends TFM_Command
+public class Command_kwtehstuff extends TFM_Command
 {
     private static final Random random = new Random();
     @Override
