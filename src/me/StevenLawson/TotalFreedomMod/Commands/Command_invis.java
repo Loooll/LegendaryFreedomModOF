@@ -5,13 +5,14 @@ import java.util.List;
 import me.StevenLawson.TotalFreedomMod.TFM_AdminList;
 import me.StevenLawson.TotalFreedomMod.TFM_Util;
 import org.apache.commons.lang3.StringUtils;
+import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 @CommandPermissions(level = AdminLevel.SUPER, source = SourceType.BOTH)
-@CommandParameters(description = "Shows (optionally smites) invisisible players", usage = "/<command> (smite)")
+@CommandParameters(description = "Shows (optionally smites) invisisible/spectator players", usage = "/<command> (smite)")
 public class Command_invis extends TFM_Command
 {
     @Override
@@ -31,14 +32,25 @@ public class Command_invis extends TFM_Command
             }
         }
 
-        List<String> players = new ArrayList<String>();
+        List<String> playerspot = new ArrayList<String>();
+        List<String> playersgm = new ArrayList<String>();
         int smites = 0;
 
         for (Player player : server.getOnlinePlayers())
         {
             if (player.hasPotionEffect(PotionEffectType.INVISIBILITY))
             {
-                players.add(player.getName());
+                playerspot.add(player.getName());
+                if (smite && !TFM_AdminList.isSuperAdmin(player))
+                {
+                    player.setHealth(0.0);
+                    smites++;
+                }
+            }
+
+            else if (player.getGameMode().equals(GameMode.SPECTATOR))
+            {
+                playersgm.add(player.getName());
                 if (smite && !TFM_AdminList.isSuperAdmin(player))
                 {
                     player.setHealth(0.0);
@@ -47,10 +59,30 @@ public class Command_invis extends TFM_Command
             }
         }
 
-        if (players.isEmpty())
+        if (playerspot.isEmpty())
         {
-            playerMsg("There are no invisible players");
-            return true;
+            if (playersgm.isEmpty())
+            {
+                playerMsg("There are no invisible players and spectator players");
+            }
+            else
+            {
+                playerMsg("There are no invisible players");
+                playerMsg("Spectator players (" + playersgm.size() + "): " + StringUtils.join(playersgm, ", "));
+            }
+        }
+
+        if (playersgm.isEmpty())
+        {
+            if (playerspot.isEmpty())
+            {
+                playerMsg("There are no invisible players and spectator players");
+            }
+            else
+            {
+                playerMsg("There are no players in spectator mode");
+                playerMsg("Invisible players (" + playersgm.size() + "): " + StringUtils.join(playersgm, ", "));
+            }
         }
 
         if (smite)
@@ -59,7 +91,8 @@ public class Command_invis extends TFM_Command
         }
         else
         {
-            playerMsg("Invisible players (" + players.size() + "): " + StringUtils.join(players, ", "));
+            playerMsg("Invisible players (" + playerspot.size() + "): " + StringUtils.join(playerspot, ", "));
+            playerMsg("Spectator players (" + playersgm.size() + "): " + StringUtils.join(playersgm, ", "));
         }
 
         return true;
